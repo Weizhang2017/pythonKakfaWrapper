@@ -3,7 +3,7 @@ from kafka.errors import KafkaError
 import functools
 import time
 from collections.abc import Iterable
-from logger import Logger
+from .logger import Logger
 
 class MessageSender:
     '''Kafka messenger'''
@@ -28,7 +28,7 @@ class MessageSender:
                     try: 
                         for key, value in function(*args, **kwargs):
                             if value:
-                                self._send(self.topic, key, value)
+                                self._send(self.topic, value, key)
                             else:
                                 self.logger.warning('No value assgined')
                                 return 'No value assgined'

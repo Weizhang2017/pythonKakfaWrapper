@@ -1,7 +1,7 @@
-from kafka_producer import MessageSender
-from kafka_consumer import MessageCollector
+from kafkaPythonWrapper import MessageSender
+from kafkaPythonWrapper import MessageCollector
 
-def producer():
+def test_producer():
 	message_sender = MessageSender(topic='test')
 	@message_sender.send_sync()
 	def produce_message():
