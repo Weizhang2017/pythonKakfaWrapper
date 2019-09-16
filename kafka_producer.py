@@ -40,20 +40,21 @@ class MessageSender:
             return wrapper
         return decorator
 
-    def _send(self, topic, key, value):
+    def _send(self, topic, value, key=None):
         # Asynchronous by default
-        if value:
+        if value and key:
             future = self.producer.send(topic, key=key.encode(), value=value.encode())
-
+        elif value and key is None:
+            future = self.producer.send(topic, value=value.encode())
             # Block for 'synchronous' sends
-            try:
-                record_metadata = future.get(timeout=10)
-                self.logger.info(f'task sent|topic: {topic}, key: {key}, value: {value}')
-                return record_metadata.topic, record_metadata.partition, record_metadata.offset
-            except KafkaError as e:
-                # Decide what to do if produce request failed...
-                self.logger.error(f'Kafka Error {e}')
-                raise Exception(f'Kafka Error {e}')
+        try:
+            record_metadata = future.get(timeout=10)
+            self.logger.info(f'task sent|topic: {topic}, key: {key}, value: {value}')
+            return record_metadata.topic, record_metadata.partition, record_metadata.offset
+        except KafkaError as e:
+            # Decide what to do if produce request failed...
+            self.logger.error(f'Kafka Error {e}')
+            raise Exception(f'Kafka Error {e}')
 
 
     def send_async(self, topic, value, key=''):

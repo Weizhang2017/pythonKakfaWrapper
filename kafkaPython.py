@@ -1,0 +1,81 @@
+import argparse
+import sys
+from kafka_producer import MessageSender
+from kafka_consumer import MessageCollector
+
+# Create the parser
+client_parser = argparse.ArgumentParser(prog='kafkaPython', description='Kafka consumer/producer', allow_abbrev=False)
+
+# Add the arguments
+types = ['consumer', 'producer']
+client_parser.add_argument(
+						   '--type',
+	                       metavar='type',
+	                       type=str,
+	                       required=True,
+	                       help='type of kafka client',
+	                       choices=types
+	                       )
+
+client_parser.add_argument(
+						   '--topic',
+						   metavar='topic',
+						   type=str,
+						   help='specify a topic for Kafka',
+						   required=True
+	)
+
+client_parser.add_argument(
+						   '--group_id',
+						   metavar='group_id',
+						   type=str,
+						   help='specify a group ID for Kafka consumer'
+	)
+
+client_parser.add_argument(
+						   '--bootstrap_server',
+						   metavar='bootstrap_server',
+						   type=str,
+						   help='specify a bootstrap server for Kafka',
+						   required=True
+	)
+
+client_parser.add_argument(
+						   '--value',
+						   metavar='value',
+						   type=str,
+						   help='specify a value to send to Kafka',
+	)
+
+client_parser.add_argument(
+						   '--key',
+						   metavar='key',
+						   type=str,
+						   help='specify a key to send to Kafka',
+	)
+
+# Execute the parse_args() method
+args = client_parser.parse_args()
+print(args)
+
+if args.type == 'consumer' and args.group_id:
+	message_collector = MessageCollector(topic=args.topic, 
+										 group_id=args.group_id,
+										 bootstrap_server=[args.bootstrap_server])
+	for message in  message_collector.consumer:
+		print(f'key = {message.key}, value = {message.value}')
+
+elif args.type == 'consumer' and args.group_id is None:
+	print('Error: please specify a group ID for Kafka consumer')
+	sys.exit()
+
+elif args.type == 'producer' and args.value:
+	message_sender = MessageSender(topic=args.topic,
+								   bootstrap_server=[args.bootstrap_server])
+	topic, partition, offset = message_sender._send(args.topic,  
+													args.value,
+													args.key)
+
+elif args.type == 'producer' and args.value is None:
+	print('Error: please specify a value for Kafka producer')
+	sys.exit()
