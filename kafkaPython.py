@@ -56,7 +56,6 @@ client_parser.add_argument(
 
 # Execute the parse_args() method
 args = client_parser.parse_args()
-print(args)
 
 if args.type == 'consumer' and args.group_id:
 	message_collector = MessageCollector(topic=args.topic, 
