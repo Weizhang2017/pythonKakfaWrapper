@@ -72,4 +72,11 @@ class MessageSender:
                     topic, key=key.encode(), value=value.encode()
             ).add_callback(on_send_success).add_errback(on_send_error)
         self.producer.flush()
-        
+    
+    def disconnect(self):
+        '''disconnect producer'''
+
+        try:
+            self.producer.close()
+        except Exception as e:
+            self.logger.error(f'disconnecting failed: {e}')

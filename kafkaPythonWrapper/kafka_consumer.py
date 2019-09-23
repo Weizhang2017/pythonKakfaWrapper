@@ -31,3 +31,12 @@ class MessageCollector:
                 except TypeError as e:
                     self.logger.error(f"function error: {e}")
         return wrapper
+
+    def disconnect(self):
+        '''disconnect consumer'''
+        
+        try:
+            self.consumer.close()
+        except Exception as e:
+            self.logger.error(f'disconnecting failed: {e}')
+
