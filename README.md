@@ -71,3 +71,9 @@ message_collector = MessageCollector(topic='test', group_id='1')
 def print_message(**kwargs):
     print(kwargs)
 ```
+
+Close producer or consumer
+```python
+message_sender.close()
+message_collector.close()
+```

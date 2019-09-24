@@ -6,7 +6,7 @@ from .logger import Logger
 class MessageCollector:
     '''Kafka messenger'''
     
-    def __init__(self, topic, group_id, bootstrap_server=['localhost:9092'], number_of_consumer=1):
+    def __init__(self, topic, group_id, bootstrap_server=['localhost:9092']):
         '''initiate a consumer with auto-offset'''
         self.logger = Logger()
         self.consumer = KafkaConsumer(topic,
