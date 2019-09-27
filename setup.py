@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="kafkaPythonWrapper",
-    version="0.1.2",
+    version="0.1.3",
     author="Wei Zhang",
     author_email="zhangw1.2011@gmail.com",
     description="A wrapper for kafka-python",

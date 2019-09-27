@@ -4,13 +4,13 @@ import functools
 import time
 from collections.abc import Iterable
 from .logger import Logger
+logger = Logger('kafka_producer')
 
 class MessageSender:
     '''Kafka messenger'''
 
     def __init__(self, topic, bootstrap_server=['localhost:9092'], retries=1):
         '''initialize a producer with no serilizer'''
-        self.logger = Logger()
         self.topic = topic
         self.producer = KafkaProducer(bootstrap_servers=bootstrap_server,
             retries=retries)
@@ -28,32 +28,32 @@ class MessageSender:
                     try: 
                         for key, value in function(*args, **kwargs):
                             if value:
-                                self._send(self.topic, value, key)
+                                self._send(value, key)
                             else:
-                                self.logger.warning('No value assgined')
+                                logger.warning('No value assgined')
                                 return 'No value assgined'
                     except Exception as e:
-                        self.logger.error(f'{e}')
+                        logger.error(f'{e}')
                         raise Exception(f'key and value cannot be assgined: {e}')
                     
                     retry -= 1
             return wrapper
         return decorator
 
-    def _send(self, topic, value, key=None):
+    def _send(self, value, key=None):
         # Asynchronous by default
         if value and key:
-            future = self.producer.send(topic, key=key.encode(), value=value.encode())
+            future = self.producer.send(self.topic, key=key.encode(), value=value.encode())
         elif value and key is None:
-            future = self.producer.send(topic, value=value.encode())
+            future = self.producer.send(self.topic, value=value.encode())
             # Block for 'synchronous' sends
         try:
             record_metadata = future.get(timeout=10)
-            self.logger.info(f'task sent|topic: {topic}, key: {key}, value: {value}')
+            logger.info(f'task sent|topic: {self.topic}, key: {key}, value: {value}')
             return record_metadata.topic, record_metadata.partition, record_metadata.offset
         except KafkaError as e:
             # Decide what to do if produce request failed...
-            self.logger.error(f'Kafka Error {e}')
+            logger.error(f'Kafka Error {e}')
             raise Exception(f'Kafka Error {e}')
 
 
@@ -61,11 +61,11 @@ class MessageSender:
         '''send a message asynchronously'''
 
         def on_send_success(record_metadata):
-            self.logger.info(record_metadata.topic, record_metadata.partition, record_metadata.offset)
+            logger.info(record_metadata.topic, record_metadata.partition, record_metadata.offset)
             return record_metadata.topic, record_metadata.partition, record_metadata.offset
 
         def on_send_error(excp):
-            self.logger.error('producer error', exc_info=excp)
+            logger.error('producer error', exc_info=excp)
             raise Exception(f'producer error: {excp}')
 
         self.producer.send(
@@ -79,4 +79,4 @@ class MessageSender:
         try:
             self.producer.close()
         except Exception as e:
-            self.logger.error(f'disconnecting failed: {e}')
+            logger.error(f'disconnecting failed: {e}')
